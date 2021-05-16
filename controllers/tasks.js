@@ -3,15 +3,15 @@ import Task from '../models/Task.model.js';
 // CREATE
 // Creates a new Task
 export const createTask = async (req, res) => {
-    const newTask = new Task(req.body);
+    const task = new Task({ ...req.body, author: req.user._id });
 
-    await newTask.save()
-        .then( () => {
-            res.status(201).json(newTask);
-        })
-        .catch( err => {
-            res.status(400).json(err)
-        });
+    try {
+        await task.save();
+
+        res.status(201).json(task);
+    } catch (err) {
+        res.status(400).json(err);
+    }
 }
 
 // ======================================================
@@ -19,7 +19,7 @@ export const createTask = async (req, res) => {
 // READ
 // Read all tasks
 export const getTasks = async (req, res) => {
-    await Task.find()
+    await Task.find({ author: req.user._id})
         .then( tasks => {
             res.status(200).json(tasks);
         })
@@ -32,16 +32,17 @@ export const getTasks = async (req, res) => {
 export const getTask = async (req, res) => {
     const _id  = req.params.id;
 
-    await Task.findById(_id)
-        .then( task => {
-            if (!task){
-                return res.status(404).json({});
-            }
-            res.status(200).json(task);
-        })
-        .catch( err => {
-            res.status(500).json(err);
-        });
+    try {
+        const task = await Task.findOne({ _id, author: req.user._id });
+
+        if (!task) {
+            return res.status(404).send();
+        }
+
+        res.status(200).json(task);
+    } catch (err) {
+        res.status(500).send();
+    }
 }
 
 // =======================================================
@@ -58,7 +59,7 @@ export const updateTask = async (req, res) => {
     }
 
     try {
-        const task = await Task.findById(req.params.id);
+        const task = await Task.findOne({ _id: req.params.id, author: req.user._id })
         
         if (!task) {
             return res.status(404).json({});
@@ -78,14 +79,15 @@ export const updateTask = async (req, res) => {
 // Delete
 // Delete task with given id
 export const deleteTask = async (req, res) => {
-    await Task.findByIdAndDelete(req.params.id)
-        .then( task => {
-            if (!task) {
-                return res.status(404).json({ message: "Task not found!" });
-            }
-            res.status(200).json(task);
-        })
-        .catch( err => {
-            res.status(400).json(err);
-        });
+    try {
+        const task = await Task.findOneAndDelete({ _id: req.params.id, author: req.user._id });
+
+        if (!task) {
+            res.status(404).send();
+        }
+
+        res.status(200).json(task);
+    }  catch (err) {
+        res.status(500).json(err);
+    }
 }

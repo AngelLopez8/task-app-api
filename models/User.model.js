@@ -3,6 +3,8 @@ import validator from 'validator';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
+import Task from '../models/Task.model.js';
+
 const UserSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -49,6 +51,24 @@ const UserSchema = new mongoose.Schema({
     }]
 });
 
+UserSchema.virtual('tasks', {
+    ref: 'Task',
+    localField: '_id',
+    foreignField: 'author'
+});
+
+// returns user object without password or tokens
+// UserSchema.methods.getPublicProfile = function () {
+UserSchema.methods.toJSON = function () {
+    const user = this;
+    const userObject = user.toObject();
+
+    delete userObject.password;
+    delete userObject.tokens;
+
+    return userObject;
+}
+
 // generates Authenication Token for user
 UserSchema.methods.generateAuthToken = async function () {
     const user = this;
@@ -85,6 +105,15 @@ UserSchema.pre('save', async function (next) {
         user.password = await bcrypt.hash(user.password, 8);
     }
     
+    next();
+});
+
+// Delete user tasks when user is removed
+UserSchema.pre('remove', async function (next) {
+    const user = this;
+
+    await Task.deleteMany({ author: user._id });    
+
     next();
 });
 

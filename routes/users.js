@@ -3,7 +3,7 @@ const router = express.Router();
 
 import auth from '../middleware/auth.js';
 
-import { createUser, login, getUsers, getUser, updateUser, deleteUser } from '../controllers/users.js';
+import { createUser, login, logout, logoutAll, getMyInfo, updateUser, deleteUser } from '../controllers/users.js';
 
 // Create
 
@@ -11,19 +11,21 @@ router.post('/', createUser);
 
 router.post('/login', login);
 
+router.post('/logout', auth, logout);
+
+router.post('/logoutAll', auth, logoutAll);
+
 // Read
 
-router.get('/', auth, getUsers);
-
-router.get('/:id', getUser);
+router.get('/me', auth, getMyInfo);
 
 // Update
 
-router.patch('/:id', updateUser);
+router.patch('/me', auth, updateUser);
 
 // Delete
 
-router.delete('/:id', deleteUser);
+router.delete('/me', auth, deleteUser);
 
 
 export default router;

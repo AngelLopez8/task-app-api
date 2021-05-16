@@ -22,41 +22,43 @@ export const login = async (req, res) => {
         const user = await User.findByCredentials(req.body.email, req.body.password)
         const token = await user.generateAuthToken();
         
+        // res.status(200).json({ user: user.getPublicProfile(), token });
         res.status(200).json({ user, token });
     } catch(err){
         res.status(400).json({ 'error': 'Unable to login'});
     }
 }
 
+// Logout User
+export const logout = async (req, res) => {
+    try {
+        req.user.tokens = req.user.tokens.filter( token => token.token !== req.token );
+        await req.user.save();
+
+        res.status(200).send();
+    } catch (err) {
+        res.status(404).json({ error: '' })
+    }
+}
+
+// Logout All
+export const logoutAll = async (req, res) => {
+    try {
+        req.user.tokens = [];
+        await req.user.save();
+
+        res.send();
+    } catch (err) {
+        res.status(500).send();
+    }
+}
+
 // ======================================================
 
 // READ
-// Get all Users
-export const getUsers = async (req, res) => {
-    await User.find()
-        .then( users => {
-            res.status(200).json(users);
-        })
-        .catch( err => {
-            res.status(500).json(err);
-        });
-}
-
-// Get User with given ID
-export const getUser = async (req, res) => {
-    const _id  = req.params.id;
-
-    await User.findById(_id)
-        .then( user => {
-            if (!user){
-                return res.status(404).json({});
-            }
-            res.status(200).json(user);
-        })
-        .catch( err => {
-            res.status(500).json(err);
-        });
-}
+export const getMyInfo = async (req, res) => {
+    res.status(200).json(req.user);
+};
 
 // =======================================================
 
@@ -72,16 +74,11 @@ export const updateUser = async (req, res) => {
     }
 
     try {
-        const user = await User.findById(req.params.id);
+        updates.forEach( update =>  req.user[update] = req.body[update] );
         
-        if (!user) {
-            return res.status(404).json({});
-        }
-        
-        updates.forEach( update =>  user[update] = req.body[update] );
-        await user.save();
+        await req.user.save();
 
-        res.status(200).json(user);
+        res.status(200).json(req.user);
     } catch(err) {
         res.status(400).json(err);
     };
@@ -92,14 +89,11 @@ export const updateUser = async (req, res) => {
 // Delete
 // Delete User with given id
 export const deleteUser = async (req, res) => {
-    await User.findByIdAndDelete(req.params.id)
-        .then( user => {
-            if (!user) {
-                return res.status(404).json({ message: "User not found!" });
-            }
-            res.status(200).json(user);
-        })
-        .catch( err => {
-            res.status(400).json(err);
-        });
+    try {
+        await req.user.remove();
+
+        res.status(200).json(req.user);
+    } catch ( err ) {
+        res.status(500).send();
+    }
 }
