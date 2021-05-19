@@ -13,7 +13,7 @@ router.post('/', auth, createTask);
 
 // GET /tasks?completed=true
 // GET /tasks?limit=10&skip=10
-// GET /tasks?sortBy=createdAt-asc
+// GET /tasks?sortBy=createdAt_asc
 router.get('/', auth, getTasks);
 
 router.get('/:id', auth, getTask);

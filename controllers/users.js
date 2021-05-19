@@ -1,5 +1,7 @@
 import User from '../models/User.model.js';
 
+import sharp from 'sharp';
+
 // CREATE
 // Creates a new User
 export const createUser = async (req, res) => {
@@ -14,6 +16,16 @@ export const createUser = async (req, res) => {
     } catch(err) {
         res.status(400).json(err)
     }
+}
+
+// Upload user Avatar
+export const uploadAv = async (req, res) => {
+    const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer();
+    req.user.avatar = buffer;
+    
+    await req.user.save();
+    
+    res.status(200).json({});
 }
 
 // Login with given email and password
@@ -56,14 +68,31 @@ export const logoutAll = async (req, res) => {
 // ======================================================
 
 // READ
+// return user info
 export const getMyInfo = async (req, res) => {
     res.status(200).json(req.user);
 };
 
+// get user avatar
+export const getMyAvatar = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+
+        if (!user || !user.avatar) {
+            throw new Error();
+        }
+
+        res.set('Content-Type', 'image/png');
+        res.send(user.avatar);
+    } catch (err) {
+        res.status(404).send();
+    }
+}
+
 // =======================================================
 
 // UPDATE
-// Update User with given id and updated data
+// Update User
 export const updateUser = async (req, res) => {
     const updates = Object.keys(req.body);
     const allowedUpdates = ['name', 'email', 'password', 'age'];
@@ -87,13 +116,26 @@ export const updateUser = async (req, res) => {
 // =======================================================
 
 // Delete
-// Delete User with given id
+// Delete User
 export const deleteUser = async (req, res) => {
     try {
         await req.user.remove();
 
         res.status(200).json(req.user);
     } catch ( err ) {
+        res.status(500).send();
+    }
+}
+
+// Delete User Avatar
+export const deleteAvatar = async (req, res) => {
+    try {
+        req.user.avatar = undefined;
+
+        await req.user.save();
+
+        res.status(200).send();
+    } catch (err) {
         res.status(500).send();
     }
 }
