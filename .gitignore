@@ -5,7 +5,3 @@ package-lock.json
 
 # ignore .env file
 .env
-
-.dockerignore
-
-docker-compose-dev.yml
