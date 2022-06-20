@@ -2,7 +2,7 @@ import sharp from 'sharp';
 
 import User from '../models/User.model.js';
 
-import { sendWelcomeEmail, sendCancelationEmail } from '../controllers/email.js';
+// import { sendWelcomeEmail, sendCancelationEmail } from '../controllers/email.js';
 
 // CREATE
 // Creates a new User
@@ -12,7 +12,7 @@ export const createUser = async (req, res) => {
     try {
         await user.save();
 
-        sendWelcomeEmail(user.email, user.name);
+        // sendWelcomeEmail(user.email, user.name);
         
         const token = await user.generateAuthToken();
         
@@ -125,7 +125,7 @@ export const deleteUser = async (req, res) => {
     try {
         await req.user.remove();
 
-        sendCancelationEmail(req.user.email, req.user.name);
+        // sendCancelationEmail(req.user.email, req.user.name);
 
         res.status(200).json(req.user);
     } catch ( err ) {

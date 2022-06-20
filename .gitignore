@@ -1,5 +1,11 @@
 # ignore node_modules directory and it's contents
 node_modules
 
+package-lock.json
+
 # ignore .env file
 .env
+
+.dockerignore
+
+docker-compose-dev.yml

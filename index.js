@@ -10,7 +10,7 @@ dotenv.config();
 import TaskRoutes from './routes/tasks.js';
 import UserRoutes from './routes/users.js';
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());

@@ -20,7 +20,7 @@ router.post('/login', login);
 
 router.post('/logout', auth, logout);
 
-router.post('/logoutAll', auth, logoutAll);
+router.post('/logoutall', auth, logoutAll);
 
 // Read
 

@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  api:
+    build:
+      dockerfile: Dockerfile.dev
+      context: .
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - 3000:3000
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URL=${MONGODB_URL}
+      - SECRET_WORD=${SECRET_WORD}
+      - SECRET_KEY=${SECRET_KEY}
+    command: node index.js
